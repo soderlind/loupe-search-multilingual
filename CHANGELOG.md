@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- The Loupe Search Block searches the page's language: the add-on adds `lang` to the block's REST
+  URL through the `loupe_search_block_rest_url` filter (Loupe Search Block 1.3.0).
+- The `lang` parameter on Loupe Search REST routes selects the language for Polylang and WPML.
+  Unknown languages are ignored.
+
 ## [0.1.0] - 2026-11-15
 
 ### Added

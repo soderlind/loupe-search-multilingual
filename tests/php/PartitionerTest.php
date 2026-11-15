@@ -55,4 +55,25 @@ final class PartitionerTest extends TestCase {
 
 		$this->assertSame( [ 'en', 'nb' ], $partitioner->filter_query_partitions( [ 'en', 'nb' ], 'post' ) );
 	}
+
+	public function test_loupe_rest_searches_follow_the_lang_parameter(): void {
+		$partitioner = new Partitioner( $this->adapter( [], 'en' ) );
+		$all         = [ 'en', 'nb', 'pt-br' ];
+
+		$partitioner->capture_rest_language( null, null, new \WP_REST_Request( '/loupe-search/v1/search', [ 'lang' => 'pt-BR' ] ) );
+		$this->assertSame( [ 'pt-br' ], $partitioner->filter_query_partitions( $all, 'post' ) );
+
+		// Unknown languages and other routes fall back to the current language.
+		$partitioner->capture_rest_language( null, null, new \WP_REST_Request( '/loupe-search/v1/search', [ 'lang' => 'xx' ] ) );
+		$this->assertSame( [ 'en' ], $partitioner->filter_query_partitions( $all, 'post' ) );
+		$partitioner->capture_rest_language( null, null, new \WP_REST_Request( '/wp/v2/posts', [ 'lang' => 'nb' ] ) );
+		$this->assertSame( [ 'en' ], $partitioner->filter_query_partitions( $all, 'post' ) );
+	}
+
+	public function test_search_block_url_gets_the_current_language(): void {
+		\Brain\Monkey\Functions\when( 'add_query_arg' )->alias( static fn ( $key, $value, $url ) => "$url?$key=$value" );
+
+		$this->assertSame( '/search?lang=nb', ( new Partitioner( $this->adapter( [], 'nb' ) ) )->filter_block_rest_url( '/search' ) );
+		$this->assertSame( '/search', ( new Partitioner( $this->adapter() ) )->filter_block_rest_url( '/search' ) );
+	}
 }

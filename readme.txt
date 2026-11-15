@@ -41,7 +41,7 @@ To the default language's index.
 
 = How do I get language-scoped results from the Loupe Search Block or REST API? =
 
-With Polylang, pass the `lang` parameter, for example `/wp-json/loupe-search/v1/search?q=garten&lang=de`.
+The Loupe Search Block (1.3.0 or later) searches the page's language. For the REST API, pass the `lang` parameter, for example `/wp-json/loupe-search/v1/search?q=garten&lang=de`. This works with Polylang and WPML.
 
 = What happens when I deactivate the add-on? =
 

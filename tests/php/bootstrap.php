@@ -14,3 +14,16 @@ if ( ! class_exists( 'WP_Post' ) ) {
 		public function __construct( public int $ID = 0, public string $post_type = 'post' ) {}
 	}
 }
+
+if ( ! class_exists( 'WP_REST_Request' ) ) {
+	// phpcs:ignore Generic.Files.OneObjectStructurePerFile
+	final class WP_REST_Request {
+		public function __construct( private string $route = '', private array $params = [] ) {}
+		public function get_route(): string {
+			return $this->route;
+		}
+		public function get_param( string $key ) {
+			return $this->params[ $key ] ?? null;
+		}
+	}
+}
