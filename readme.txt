@@ -5,7 +5,7 @@ Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
 Requires Plugins: loupe-search
-Stable tag: 0.1.0
+Stable tag: 0.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,10 @@ The Loupe Search Block (1.3.0 or later) searches the page's language. For the RE
 Loupe Search shows its notice; reindex to get back to one index per post type.
 
 == Changelog ==
+
+= 0.2.0 =
+* The Loupe Search Block searches the page's language (needs Loupe Search Block 1.3.0).
+* The REST `lang` parameter selects the language with Polylang and WPML.
 
 = 0.1.0 =
 * Initial release: one Loupe Search index per language for Polylang and WPML.
