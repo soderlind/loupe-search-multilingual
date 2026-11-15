@@ -10,7 +10,7 @@
  * Plugin Name:       Loupe Search Multilingual
  * Plugin URI:        https://github.com/soderlind/loupe-search-multilingual
  * Description:       One Loupe Search index per language for sites translated with Polylang or WPML, so each language gets its own stemming and stop words and visitors only find posts in their language.
- * Version:           0.1.0
+ * Version:           0.2.0
  * Author:            Per Soderlind
  * Author URI:        https://soderlind.no
  * License:           GPL-2.0+
@@ -26,7 +26,7 @@ namespace Soderlind\Plugin\LoupeSearchMultilingual;
 
 defined( 'ABSPATH' ) || exit;
 
-const VERSION = '0.1.0';
+const VERSION = '0.2.0';
 const FILE    = __FILE__;
 
 spl_autoload_register(

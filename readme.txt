@@ -5,7 +5,7 @@ Requires at least: 7.0
 Tested up to: 7.1
 Requires PHP: 8.3
 Requires Plugins: loupe-search
-Stable tag: 0.1.0
+Stable tag: 0.2.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,13 +41,17 @@ To the default language's index.
 
 = How do I get language-scoped results from the Loupe Search Block or REST API? =
 
-With Polylang, pass the `lang` parameter, for example `/wp-json/loupe-search/v1/search?q=garten&lang=de`.
+The Loupe Search Block (1.3.0 or later) searches the page's language. For the REST API, pass the `lang` parameter, for example `/wp-json/loupe-search/v1/search?q=garten&lang=de`. This works with Polylang and WPML.
 
 = What happens when I deactivate the add-on? =
 
 Loupe Search shows its notice; reindex to get back to one index per post type.
 
 == Changelog ==
+
+= 0.2.0 =
+* The Loupe Search Block searches the page's language (needs Loupe Search Block 1.3.0).
+* The REST `lang` parameter selects the language with Polylang and WPML.
 
 = 0.1.0 =
 * Initial release: one Loupe Search index per language for Polylang and WPML.

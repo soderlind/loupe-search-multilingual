@@ -55,14 +55,21 @@ language for every partition.
 
 ## Search Block and REST
 
-Polylang sets the current language for REST requests from the `lang` parameter. Pass it to get
-results in one language:
+The REST search takes a `lang` parameter, for Polylang and WPML alike:
 
 ```
 /wp-json/loupe-search/v1/search?q=garten&lang=de
 ```
 
-Without `lang`, the REST search covers all languages.
+Without `lang`, the REST search covers all languages. Unknown languages are ignored.
+
+The [Loupe Search Block](https://github.com/soderlind/loupe-search-block) (1.3.0 or later) adds
+the page's language to its REST URL, so a search on a German page returns German results.
+
+## Loupe Semantic Search
+
+With [Loupe Semantic Search](https://github.com/soderlind/loupe-semantic-search) (0.1.3 or later),
+semantic hits and RAG passages are limited to the languages being searched, like keyword hits.
 
 ## Other multilingual plugins
 

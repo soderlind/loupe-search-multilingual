@@ -24,6 +24,16 @@ final class Partitioner {
 	 */
 	private ?array $partitions = null;
 
+	/** Partition requested with the `lang` parameter of a Loupe Search REST request. */
+	private ?string $rest_partition = null;
+
+	/**
+	 * Partitions to restore when each REST callback finishes (nested requests).
+	 *
+	 * @var array<int, ?string>
+	 */
+	private array $rest_partition_stack = [];
+
 	public function __construct( private Language_Adapter $adapter ) {}
 
 	public function register(): void {
@@ -32,6 +42,9 @@ final class Partitioner {
 		add_filter( 'loupe_search_partition_language', [ $this, 'filter_partition_language' ], 10, 3 );
 		add_filter( 'loupe_search_partition_label', [ $this, 'filter_partition_label' ], 10, 3 );
 		add_filter( 'loupe_search_query_partitions', [ $this, 'filter_query_partitions' ], 10, 2 );
+		add_filter( 'rest_request_before_callbacks', [ $this, 'capture_rest_language' ], 10, 3 );
+		add_filter( 'rest_request_after_callbacks', [ $this, 'restore_rest_language' ], 10, 3 );
+		add_filter( 'loupe_search_block_rest_url', [ $this, 'filter_block_rest_url' ] );
 	}
 
 	/**
@@ -99,12 +112,64 @@ final class Partitioner {
 	 * @return mixed
 	 */
 	public function filter_query_partitions( $partitions, $post_type ) {
-		$current = $this->adapter->current_language();
+		$current = $this->rest_partition ?? $this->adapter->current_language();
 		if ( null === $current || ! is_array( $partitions ) ) {
 			return $partitions;
 		}
 		$current = WP_Loupe_Partitions::sanitize( $current );
 		return in_array( $current, $partitions, true ) ? [ $current ] : $partitions;
+	}
+
+	/**
+	 * Scope Loupe Search REST searches to the `lang` parameter, whether or not
+	 * the multilingual plugin sets its language from it. Applies only while the
+	 * route's callbacks run; restore_rest_language() undoes it.
+	 *
+	 * @param mixed            $response Response so far; passed through.
+	 * @param mixed            $handler  Route handler.
+	 * @param \WP_REST_Request $request  Request.
+	 * @return mixed
+	 */
+	public function capture_rest_language( $response, $handler, $request ) {
+		$this->rest_partition_stack[] = $this->rest_partition;
+		if ( ! $request instanceof \WP_REST_Request || ! preg_match( '#^/(loupe-search|wp-loupe)/#', $request->get_route() ) ) {
+			return $response;
+		}
+		$this->rest_partition = null;
+		$language             = $request->get_param( 'lang' );
+		if ( is_string( $language ) ) {
+			$partition = WP_Loupe_Partitions::sanitize( $language );
+			if ( isset( $this->partition_map()[ $partition ] ) ) {
+				$this->rest_partition = $partition;
+			}
+		}
+		return $response;
+	}
+
+	/**
+	 * Restore the language that applied before the REST callbacks ran.
+	 *
+	 * @param mixed $response Response; passed through.
+	 * @param mixed $handler  Route handler.
+	 * @param mixed $request  Request.
+	 * @return mixed
+	 */
+	public function restore_rest_language( $response, $handler, $request ) {
+		if ( $this->rest_partition_stack ) {
+			$this->rest_partition = array_pop( $this->rest_partition_stack );
+		}
+		return $response;
+	}
+
+	/**
+	 * Loupe Search Block: search in the page's language.
+	 *
+	 * @param mixed $url REST URL.
+	 * @return mixed
+	 */
+	public function filter_block_rest_url( $url ) {
+		$current = $this->adapter->current_language();
+		return is_string( $url ) && null !== $current ? add_query_arg( 'lang', $current, $url ) : $url;
 	}
 
 	/**
