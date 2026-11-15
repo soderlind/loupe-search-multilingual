@@ -62,11 +62,29 @@ final class PartitionerTest extends TestCase {
 
 		$partitioner->capture_rest_language( null, null, new \WP_REST_Request( '/loupe-search/v1/search', [ 'lang' => 'pt-BR' ] ) );
 		$this->assertSame( [ 'pt-br' ], $partitioner->filter_query_partitions( $all, 'post' ) );
+		$partitioner->restore_rest_language( null, null, null );
 
 		// Unknown languages and other routes fall back to the current language.
 		$partitioner->capture_rest_language( null, null, new \WP_REST_Request( '/loupe-search/v1/search', [ 'lang' => 'xx' ] ) );
 		$this->assertSame( [ 'en' ], $partitioner->filter_query_partitions( $all, 'post' ) );
+		$partitioner->restore_rest_language( null, null, null );
 		$partitioner->capture_rest_language( null, null, new \WP_REST_Request( '/wp/v2/posts', [ 'lang' => 'nb' ] ) );
+		$this->assertSame( [ 'en' ], $partitioner->filter_query_partitions( $all, 'post' ) );
+		$partitioner->restore_rest_language( null, null, null );
+	}
+
+	public function test_rest_language_ends_with_its_request(): void {
+		$partitioner = new Partitioner( $this->adapter( [], 'en' ) );
+		$all         = [ 'en', 'nb', 'pt-br' ];
+
+		$partitioner->capture_rest_language( null, null, new \WP_REST_Request( '/loupe-search/v1/search', [ 'lang' => 'nb' ] ) );
+		// A nested request with another language.
+		$partitioner->capture_rest_language( null, null, new \WP_REST_Request( '/loupe-search/v1/search', [ 'lang' => 'pt-br' ] ) );
+		$this->assertSame( [ 'pt-br' ], $partitioner->filter_query_partitions( $all, 'post' ) );
+		$partitioner->restore_rest_language( null, null, null );
+		$this->assertSame( [ 'nb' ], $partitioner->filter_query_partitions( $all, 'post' ) );
+		$partitioner->restore_rest_language( null, null, null );
+
 		$this->assertSame( [ 'en' ], $partitioner->filter_query_partitions( $all, 'post' ) );
 	}
 
